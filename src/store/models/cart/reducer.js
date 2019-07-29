@@ -1,3 +1,40 @@
-export default function cart() {
-  return [];
+import produce from 'immer';
+
+export default function cart(state = [], action) {
+  switch (action.type) {
+    case '@cart/ADD':
+      return produce(state, draft => {
+        const productIndex = draft.findIndex(
+          item => item.id === action.product.id
+        );
+
+        if (productIndex >= 0) {
+          draft[productIndex].amount += 1;
+        } else {
+          draft.push({ ...action.product, amount: 1 });
+        }
+      });
+    case '@cart/REMOVE':
+      return produce(state, draft => {
+        const productIndex = draft.findIndex(item => item.id === action.id);
+
+        draft.splice(productIndex, 1);
+      });
+    case '@cart/UPDATE_AMOUNT':
+      return produce(state, draft => {
+        const productIndex = draft.findIndex(item => item.id === action.id);
+
+        if (action.value === 1) {
+          draft[productIndex].amount += 1;
+        } else {
+          draft[productIndex].amount -= 1;
+        }
+
+        if (draft[productIndex].amount === 0) {
+          draft.splice(productIndex, 1);
+        }
+      });
+    default:
+      return state;
+  }
 }
